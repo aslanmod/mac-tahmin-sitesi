@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <title>Maç Tahminleri</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     body {
       background: #14181e;
@@ -142,6 +143,7 @@
       border-radius: 12px;
       overflow: hidden;
       box-shadow: 0 2px 14px 0 #0002;
+      display: table;
     }
     .puan-tablosu th, .puan-tablosu td {
       padding: 8px 10px;
@@ -161,7 +163,7 @@
       padding-left: 8px;
       display: flex;
       align-items: center;
-      gap: 7px; /* logo-sira değişimi-isim arası boşluk */
+      gap: 7px;
     }
     .sira-degisim {
       font-weight: bold;
@@ -189,6 +191,92 @@
       padding: 12px;
       color: #ffd700;
       background: none;
+    }
+    /* ----------- Responsive (Mobil) ----------- */
+    @media (max-width: 800px) {
+      .container {
+        max-width: 99vw;
+        padding: 0 2vw;
+      }
+      .hafta-title {
+        font-size: 1.15rem;
+        margin-bottom: 16px;
+      }
+      .mac-row {
+        flex-wrap: wrap;
+        flex-direction: column;
+        align-items: stretch;
+        margin: 12px 0;
+        padding: 10px 0;
+        border-bottom: 1px solid #232323;
+        gap: 0;
+      }
+      .takim-isim,
+      .takim-isim-dep {
+        width: 100%;
+        min-width: 0;
+        text-align: center !important;
+        justify-content: center;
+        font-size: 15px;
+        padding: 0;
+        margin-bottom: 2px;
+      }
+      .takim-logo, .takim-logo-dep {
+        margin: 0 0 8px 0;
+        display: block;
+        margin-left: auto;
+        margin-right: auto;
+        height: 32px;
+        width: 32px;
+      }
+      .tahmin-input {
+        width: 40px;
+        font-size: 20px;
+        margin: 6px 8px;
+      }
+      .orta-cizgi {
+        width: 20px;
+        font-size: 20px;
+        margin: 0 4px;
+      }
+      .buton-bar {
+        flex-direction: column;
+        gap: 11px;
+        margin-top: 20px;
+        margin-bottom: 15px;
+      }
+      .puan-tablosu th, .puan-tablosu td {
+        font-size: 13px;
+        padding: 4px 2px;
+      }
+      .puan-tablosu .takim-adi {
+        font-size: 13px;
+        gap: 3px;
+        padding-left: 2px;
+      }
+      .puan-tablosu caption {
+        font-size: 1rem;
+        padding: 5px;
+      }
+    }
+    @media (max-width: 480px) {
+      .puan-tablosu {
+        font-size: 12px;
+        overflow-x: auto;
+        display: block;
+        max-width: 100vw;
+      }
+      .hafta-title {
+        font-size: 1rem;
+      }
+      .takim-logo, .takim-logo-dep {
+        height: 25px;
+        width: 25px;
+      }
+      .tahmin-input {
+        width: 34px;
+        font-size: 16px;
+      }
     }
   </style>
 </head>
