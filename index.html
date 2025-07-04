@@ -1,0 +1,841 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+  <meta charset="UTF-8">
+  <title>Maç Tahminleri</title>
+  <style>
+    body {
+      background: #14181e;
+      color: #fff;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    .container {
+      max-width: 640px;
+      margin: 32px auto 0 auto;
+      padding: 0 12px;
+    }
+    .hafta-title {
+      font-size: 2rem;
+      font-weight: bold;
+      text-align: center;
+      margin-bottom: 28px;
+      letter-spacing: 1px;
+    }
+    .mac-row {
+      margin: 14px 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0;
+    }
+    .takim-isim {
+      width: 115px;
+      text-align: right !important;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      padding-right: 15px;
+      white-space: nowrap;
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+    }
+    .takim-isim-dep {
+      width: 115px;
+      text-align: left;
+      font-weight: bold;
+      letter-spacing: 0.5px;
+      padding-left: 15px;
+      white-space: nowrap;
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+    }
+    .tahmin-input {
+      width: 32px;
+      text-align: center;
+      font-size: 18px;
+      border-radius: 6px;
+      border: 1px solid #555;
+      padding: 2px 4px;
+      background: #191b22;
+      color: #ffd700;
+      font-weight: bold;
+      outline: none;
+      transition: border 0.2s;
+      margin: 0 6px;
+    }
+    .tahmin-input:focus {
+      border: 1.5px solid #ffd700;
+    }
+    .orta-cizgi {
+      width: 22px;
+      text-align: center;
+      font-size: 20px;
+      color: #bbb;
+      margin: 0 2px;
+    }
+    .takim-logo {
+      height: 28px;
+      width: 28px;
+      display: inline-block;
+      vertical-align: middle;
+      border-radius: 5px;
+      background: #fff;
+      object-fit: contain;
+      border: 1px solid #22242a;
+      margin-left: 15px;
+      margin-right: 12px;
+    }
+    .takim-logo-dep {
+      margin-right: 15px;
+      margin-left: 12px;
+      height: 28px;
+      width: 28px;
+      display: inline-block;
+      vertical-align: middle;
+      border-radius: 5px;
+      background: #fff;
+      object-fit: contain;
+      border: 1px solid #22242a;
+    }
+    .buton-bar {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 18px;
+      margin-top: 32px;
+      margin-bottom: 28px;
+    }
+    .buton-bar button {
+      font-weight: bold;
+      font-size: 1rem;
+      border: none;
+      border-radius: 11px;
+      padding: 10px 24px;
+      background: #22242a;
+      color: #fff;
+      cursor: pointer;
+      transition: background 0.18s, color 0.18s;
+    }
+    .buton-bar .aktif {
+      background: #ffd700;
+      color: #18191a;
+      box-shadow: 0 2px 8px 0 #0002;
+    }
+    .buton-bar .tahmin-kaydet {
+      background: #ffd700;
+      color: #18191a;
+      margin: 0 3px;
+      box-shadow: 0 2px 8px 0 #0002;
+      cursor: pointer;
+    }
+    .buton-bar .tahmin-kaydet:hover {
+      background: #ffe25e;
+    }
+    .puan-tablosu {
+      width: 100%;
+      margin: 0 auto 48px auto;
+      border-collapse: collapse;
+      background: #191b22;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 2px 14px 0 #0002;
+    }
+    .puan-tablosu th, .puan-tablosu td {
+      padding: 8px 10px;
+      border-bottom: 1px solid #22242a;
+      text-align: center;
+      font-size: 16px;
+    }
+    .puan-tablosu th {
+      background: #ffd700;
+      color: #18191a;
+      font-size: 17px;
+    }
+    .puan-tablosu .takim-adi {
+      text-align: left;
+      font-weight: bold;
+      color: #ffd700;
+      padding-left: 8px;
+      display: flex;
+      align-items: center;
+      gap: 7px; /* logo-sira değişimi-isim arası boşluk */
+    }
+    .sira-degisim {
+      font-weight: bold;
+      font-size: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 2px;
+      min-width: 32px;
+      justify-content: flex-end;
+    }
+    .sira-up {
+      color: #37e45d;
+    }
+    .sira-down {
+      color: #e03c45;
+    }
+    .puan-tablosu tr:last-child td {
+      border-bottom: none;
+    }
+    .puan-tablosu caption {
+      caption-side: top;
+      text-align: center;
+      font-size: 1.25rem;
+      font-weight: bold;
+      padding: 12px;
+      color: #ffd700;
+      background: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="hafta-title" id="haftaTitle"></div>
+    <div id="maclar"></div>
+    <div class="buton-bar">
+      <button id="oncekiBtn" class="aktif">ÖNCEKİ HAFTA</button>
+      <button class="tahmin-kaydet" id="kaydetBtn">TAHMİNİ KAYDET</button>
+      <button id="sonrakiBtn">SONRAKİ HAFTA</button>
+    </div>
+    <div id="puanTablosu"></div>
+  </div>
+  <script>
+    // TAKIM LİSTESİ VE LOGO SÖZLÜĞÜ
+    const takimBilgi = {
+      "ANTALYASPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/b/b9/Antalyaspor_logo.png" },
+      "FENERBAHÇE": { logo: "https://upload.wikimedia.org/wikipedia/tr/8/86/Fenerbah%C3%A7e_SK.png" },
+      "TRABZONSPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/a/ab/TrabzonsporAmblemi.png" },
+      "KAYSERİSPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/c/c2/Kayserispor_logosu.png" },
+      "EYÜPSPOR": { logo: "https://upload.wikimedia.org/wikipedia/commons/6/62/Ey%C3%BCpspor_Logosu.png" },
+      "GAZİANTEP FK": { logo: "https://upload.wikimedia.org/wikipedia/commons/1/1a/GFK-Official-Logo.png" },
+      "SAMSUNSPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/d/d2/Samsunspor_logo.png" },
+      "Ç. RİZESPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/f/f6/%C3%87aykur_Rizespor_Logo.png" },
+      "KARAGÜMRÜK": { logo: "https://upload.wikimedia.org/wikipedia/tr/9/90/Fatihkaragumruk.png" },
+      "KASIMPAŞA": { logo: "https://upload.wikimedia.org/wikipedia/tr/6/68/Kasimpasa_2012.png" },
+      "ALANYASPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/2/29/Alanyaspor_logo.png" },
+      "KOCAELİSPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/5/5a/Kocaelispor.png" },
+      "BEŞİKTAŞ": { logo: "https://upload.wikimedia.org/wikipedia/commons/d/da/BesiktasJK-Logo.svg" },
+      "KONYASPOR": { logo: "https://upload.wikimedia.org/wikipedia/tr/4/41/Konyaspor_1922.png" },
+      "GALATASARAY": { logo: "https://upload.wikimedia.org/wikipedia/commons/0/0b/Galatasaray_AS_logo_2025.svg" },
+      "GENÇLERBİRLİĞİ": { logo: "https://upload.wikimedia.org/wikipedia/tr/f/f7/Genclerbirligi.png" },
+      "GÖZTEPE": { logo: "https://upload.wikimedia.org/wikipedia/tr/f/fe/G%C3%B6ztepe.png" },
+      "BAŞAKŞEHİR": { logo: "https://upload.wikimedia.org/wikipedia/tr/c/cd/%C4%B0stanbul_Ba%C5%9Fak%C5%9Fehir_FK.png" }
+    };
+
+    // BÜTÜN HAFTA MAÇLARI
+    const haftalar = [
+  // 1. HAFTA
+  [
+    ["ANTALYASPOR", "KASIMPAŞA"],
+    ["FENERBAHÇE", "ALANYASPOR"],
+    ["TRABZONSPOR", "KOCAELİSPOR"],
+    ["KAYSERİSPOR", "BEŞİKTAŞ"],
+    ["EYÜPSPOR", "KONYASPOR"],
+    ["GAZİANTEP FK", "GALATASARAY"],
+    ["SAMSUNSPOR", "GENÇLERBİRLİĞİ"],
+    ["Ç. RİZESPOR", "GÖZTEPE"],
+    ["KARAGÜMRÜK", "BAŞAKŞEHİR"]
+  ],
+  // 2. HAFTA
+  [
+    ["KONYASPOR", "GAZİANTEP FK"],
+    ["GALATASARAY", "KARAGÜMRÜK"],
+    ["ALANYASPOR", "Ç. RİZESPOR"],
+    ["BEŞİKTAŞ", "EYÜPSPOR"],
+    ["GÖZTEPE", "FENERBAHÇE"],
+    ["KASIMPAŞA", "TRABZONSPOR"],
+    ["KOCAELİSPOR", "SAMSUNSPOR"],
+    ["GENÇLERBİRLİĞİ", "ANTALYASPOR"],
+    ["BAŞAKŞEHİR", "KAYSERİSPOR"]
+  ],
+  // 3. HAFTA
+  [
+    ["TRABZONSPOR", "ANTALYASPOR"],
+    ["EYÜPSPOR", "ALANYASPOR"],
+    ["SAMSUNSPOR", "KASIMPAŞA"],
+    ["FENERBAHÇE", "KOCAELİSPOR"],
+    ["KONYASPOR", "BEŞİKTAŞ"],
+    ["GAZİANTEP FK", "GENÇLERBİRLİĞİ"],
+    ["KAYSERİSPOR", "GALATASARAY"],
+    ["KARAGÜMRÜK", "GÖZTEPE"],
+    ["Ç. RİZESPOR", "BAŞAKŞEHİR"]
+  ],
+  // 4. HAFTA
+  [
+    ["GALATASARAY", "Ç. RİZESPOR"],
+    ["KASIMPAŞA", "GAZİANTEP FK"],
+    ["BAŞAKŞEHİR", "EYÜPSPOR"],
+    ["ANTALYASPOR", "KARAGÜMRÜK"],
+    ["GÖZTEPE", "KONYASPOR"],
+    ["TRABZONSPOR", "SAMSUNSPOR"],
+    ["ALANYASPOR", "BEŞİKTAŞ"],
+    ["GENÇLERBİRLİĞİ", "FENERBAHÇE"],
+    ["KOCAELİSPOR", "KAYSERİSPOR"]
+  ],
+  // 5. HAFTA
+  [
+    ["SAMSUNSPOR", "ANTALYASPOR"],
+    ["KARAGÜMRÜK", "KASIMPAŞA"],
+    ["KONYASPOR", "ALANYASPOR"],
+    ["FENERBAHÇE", "TRABZONSPOR"],
+    ["GAZİANTEP FK", "KOCAELİSPOR"],
+    ["EYÜPSPOR", "GALATASARAY"],
+    ["Ç. RİZESPOR", "GENÇLERBİRLİĞİ"],
+    ["KAYSERİSPOR", "GÖZTEPE"],
+    ["BEŞİKTAŞ", "BAŞAKŞEHİR"]
+  ],
+  // 6. HAFTA
+  [
+    ["TRABZONSPOR", "GAZİANTEP FK"],
+    ["GENÇLERBİRLİĞİ", "EYÜPSPOR"],
+    ["SAMSUNSPOR", "KARAGÜMRÜK"],
+    ["KOCAELİSPOR", "Ç. RİZESPOR"],
+    ["GALATASARAY", "KONYASPOR"],
+    ["KASIMPAŞA", "FENERBAHÇE"],
+    ["GÖZTEPE", "BEŞİKTAŞ"],
+    ["BAŞAKŞEHİR", "ALANYASPOR"],
+    ["ANTALYASPOR", "KAYSERİSPOR"]
+  ],
+  // 7. HAFTA
+  [
+    ["FENERBAHÇE", "ANTALYASPOR"],
+    ["Ç. RİZESPOR", "KASIMPAŞA"],
+    ["BEŞİKTAŞ", "KOCAELİSPOR"],
+    ["KARAGÜMRÜK", "TRABZONSPOR"],
+    ["ALANYASPOR", "GALATASARAY"],
+    ["GAZİANTEP FK", "SAMSUNSPOR"],
+    ["KAYSERİSPOR", "GENÇLERBİRLİĞİ"],
+    ["EYÜPSPOR", "GÖZTEPE"],
+    ["KONYASPOR", "BAŞAKŞEHİR"]
+  ],
+  // 8. HAFTA
+  [
+    ["GÖZTEPE", "BAŞAKŞEHİR"],
+    ["KARAGÜMRÜK", "GAZİANTEP FK"],
+    ["ANTALYASPOR", "Ç. RİZESPOR"],
+    ["KOCAELİSPOR", "EYÜPSPOR"],
+    ["KASIMPAŞA", "KONYASPOR"],
+    ["SAMSUNSPOR", "FENERBAHÇE"],
+    ["GALATASARAY", "BEŞİKTAŞ"],
+    ["GENÇLERBİRLİĞİ", "ALANYASPOR"],
+    ["TRABZONSPOR", "KAYSERİSPOR"]
+  ],
+  // 9. HAFTA
+  [
+    ["GAZİANTEP FK", "ANTALYASPOR"],
+    ["EYÜPSPOR", "KASIMPAŞA"],
+    ["KONYASPOR", "KOCAELİSPOR"],
+    ["Ç. RİZESPOR", "TRABZONSPOR"],
+    ["KAYSERİSPOR", "SAMSUNSPOR"],
+    ["BEŞİKTAŞ", "GENÇLERBİRLİĞİ"],
+    ["BAŞAKŞEHİR", "GALATASARAY"],
+    ["FENERBAHÇE", "KARAGÜMRÜK"],
+    ["ALANYASPOR", "GÖZTEPE"]
+  ],
+  // 10. HAFTA
+  [
+    ["SAMSUNSPOR", "Ç. RİZESPOR"],
+    ["TRABZONSPOR", "EYÜPSPOR"],
+    ["GENÇLERBİRLİĞİ", "KONYASPOR"],
+    ["GAZİANTEP FK", "FENERBAHÇE"],
+    ["KASIMPAŞA", "BEŞİKTAŞ"],
+    ["KOCAELİSPOR", "ALANYASPOR"],
+    ["KARAGÜMRÜK", "KAYSERİSPOR"],
+    ["ANTALYASPOR", "BAŞAKŞEHİR"],
+    ["GALATASARAY", "GÖZTEPE"]
+  ],
+  // 11. HAFTA
+  [
+    ["EYÜPSPOR", "ANTALYASPOR"],
+    ["KAYSERİSPOR", "KASIMPAŞA"],
+    ["BAŞAKŞEHİR", "KOCAELİSPOR"],
+    ["BEŞİKTAŞ", "FENERBAHÇE"],
+    ["GALATASARAY", "TRABZONSPOR"],
+    ["KONYASPOR", "SAMSUNSPOR"],
+    ["GÖZTEPE", "GENÇLERBİRLİĞİ"],
+    ["Ç. RİZESPOR", "KARAGÜMRÜK"],
+    ["ALANYASPOR", "GAZİANTEP FK"]
+  ],
+  // 12. HAFTA
+  [
+    ["KASIMPAŞA", "GÖZTEPE"],
+    ["SAMSUNSPOR", "EYÜPSPOR"],
+    ["GAZİANTEP FK", "Ç. RİZESPOR"],
+    ["KARAGÜMRÜK", "KONYASPOR"],
+    ["KOCAELİSPOR", "GALATASARAY"],
+    ["ANTALYASPOR", "BEŞİKTAŞ"],
+    ["TRABZONSPOR", "ALANYASPOR"],
+    ["FENERBAHÇE", "KAYSERİSPOR"],
+    ["GENÇLERBİRLİĞİ", "BAŞAKŞEHİR"]
+  ],
+  // 13. HAFTA
+  [
+    ["KONYASPOR", "ANTALYASPOR"],
+    ["ALANYASPOR", "KASIMPAŞA"],
+    ["GÖZTEPE", "KOCAELİSPOR"],
+    ["BEŞİKTAŞ", "SAMSUNSPOR"],
+    ["BAŞAKŞEHİR", "TRABZONSPOR"],
+    ["Ç. RİZESPOR", "FENERBAHÇE"],
+    ["GALATASARAY", "GENÇLERBİRLİĞİ"],
+    ["EYÜPSPOR", "KARAGÜMRÜK"],
+    ["KAYSERİSPOR", "GAZİANTEP FK"]
+  ],
+  // 14. HAFTA
+  [
+    ["ANTALYASPOR", "GÖZTEPE"],
+    ["GAZİANTEP FK", "EYÜPSPOR"],
+    ["FENERBAHÇE", "GALATASARAY"],
+    ["KOCAELİSPOR", "GENÇLERBİRLİĞİ"],
+    ["TRABZONSPOR", "KONYASPOR"],
+    ["KARAGÜMRÜK", "BEŞİKTAŞ"],
+    ["SAMSUNSPOR", "ALANYASPOR"],
+    ["Ç. RİZESPOR", "KAYSERİSPOR"],
+    ["KASIMPAŞA", "BAŞAKŞEHİR"]
+  ],
+  // 15. HAFTA
+  [
+    ["EYÜPSPOR", "KAYSERİSPOR"],
+    ["ALANYASPOR", "ANTALYASPOR"],
+    ["KOCAELİSPOR", "KASIMPAŞA"],
+    ["BAŞAKŞEHİR", "FENERBAHÇE"],
+    ["GÖZTEPE", "TRABZONSPOR"],
+    ["GALATASARAY", "SAMSUNSPOR"],
+    ["KONYASPOR", "Ç. RİZESPOR"],
+    ["BEŞİKTAŞ", "GAZİANTEP FK"],
+    ["GENÇLERBİRLİĞİ", "KARAGÜMRÜK"]
+  ],
+  // 16. HAFTA
+  [
+    ["GAZİANTEP FK", "GÖZTEPE"],
+    ["FENERBAHÇE", "KONYASPOR"],
+    ["ANTALYASPOR", "GALATASARAY"],
+    ["KASIMPAŞA", "GENÇLERBİRLİĞİ"],
+    ["Ç. RİZESPOR", "EYÜPSPOR"],
+    ["TRABZONSPOR", "BEŞİKTAŞ"],
+    ["KARAGÜMRÜK", "KOCAELİSPOR"],
+    ["KAYSERİSPOR", "ALANYASPOR"],
+    ["SAMSUNSPOR", "BAŞAKŞEHİR"]
+  ],
+  // 17. HAFTA
+  [
+    ["GALATASARAY", "KASIMPAŞA"],
+    ["KOCAELİSPOR", "ANTALYASPOR"],
+    ["KONYASPOR", "KAYSERİSPOR"],
+    ["GENÇLERBİRLİĞİ", "TRABZONSPOR"],
+    ["EYÜPSPOR", "FENERBAHÇE"],
+    ["GÖZTEPE", "SAMSUNSPOR"],
+    ["BAŞAKŞEHİR", "GAZİANTEP FK"],
+    ["BEŞİKTAŞ", "Ç. RİZESPOR"],
+    ["ALANYASPOR", "KARAGÜMRÜK"]
+  ],
+  // 18. HAFTA
+  [
+    ["KONYASPOR", "EYÜPSPOR"],
+    ["BAŞAKŞEHİR", "KARAGÜMRÜK"],
+    ["GÖZTEPE", "Ç. RİZESPOR"],
+    ["GALATASARAY", "GAZİANTEP FK"],
+    ["GENÇLERBİRLİĞİ", "SAMSUNSPOR"],
+    ["KOCAELİSPOR", "TRABZONSPOR"],
+    ["ALANYASPOR", "FENERBAHÇE"],
+    ["BEŞİKTAŞ", "KAYSERİSPOR"],
+    ["KASIMPAŞA", "ANTALYASPOR"]
+  ],
+  // 19. HAFTA
+  [
+    ["TRABZONSPOR", "KASIMPAŞA"],
+    ["Ç. RİZESPOR", "ALANYASPOR"],
+    ["EYÜPSPOR", "BEŞİKTAŞ"],
+    ["SAMSUNSPOR", "KOCAELİSPOR"],
+    ["KARAGÜMRÜK", "GALATASARAY"],
+    ["GAZİANTEP FK", "KONYASPOR"],
+    ["ANTALYASPOR", "GENÇLERBİRLİĞİ"],
+    ["FENERBAHÇE", "GÖZTEPE"],
+    ["KAYSERİSPOR", "BAŞAKŞEHİR"]
+  ],
+  // 20. HAFTA
+  [
+    ["GENÇLERBİRLİĞİ", "GAZİANTEP FK"],
+    ["BAŞAKŞEHİR", "Ç. RİZESPOR"],
+    ["GÖZTEPE", "KARAGÜMRÜK"],
+    ["ALANYASPOR", "EYÜPSPOR"],
+    ["BEŞİKTAŞ", "KONYASPOR"],
+    ["KOCAELİSPOR", "FENERBAHÇE"],
+    ["ANTALYASPOR", "TRABZONSPOR"],
+    ["KASIMPAŞA", "SAMSUNSPOR"],
+    ["GALATASARAY", "KAYSERİSPOR"]
+  ],
+  // 21. HAFTA
+  [
+    ["KARAGÜMRÜK", "ANTALYASPOR"],
+    ["BEŞİKTAŞ", "ALANYASPOR"],
+    ["GAZİANTEP FK", "KASIMPAŞA"],
+    ["SAMSUNSPOR", "TRABZONSPOR"],
+    ["KAYSERİSPOR", "KOCAELİSPOR"],
+    ["Ç. RİZESPOR", "GALATASARAY"],
+    ["FENERBAHÇE", "GENÇLERBİRLİĞİ"],
+    ["KONYASPOR", "GÖZTEPE"],
+    ["EYÜPSPOR", "BAŞAKŞEHİR"]
+  ],
+  // 22. HAFTA
+  [
+    ["GENÇLERBİRLİĞİ", "Ç. RİZESPOR"],
+    ["KOCAELİSPOR", "GAZİANTEP FK"],
+    ["GALATASARAY", "EYÜPSPOR"],
+    ["KASIMPAŞA", "KARAGÜMRÜK"],
+    ["ALANYASPOR", "KONYASPOR"],
+    ["BAŞAKŞEHİR", "BEŞİKTAŞ"],
+    ["ANTALYASPOR", "SAMSUNSPOR"],
+    ["TRABZONSPOR", "FENERBAHÇE"],
+    ["GÖZTEPE", "KAYSERİSPOR"]
+  ],
+  // 23. HAFTA
+  [
+    ["KAYSERİSPOR", "ANTALYASPOR"],
+    ["FENERBAHÇE", "KASIMPAŞA"],
+    ["KARAGÜMRÜK", "SAMSUNSPOR"],
+    ["GAZİANTEP FK", "TRABZONSPOR"],
+    ["Ç. RİZESPOR", "KOCAELİSPOR"],
+    ["EYÜPSPOR", "GENÇLERBİRLİĞİ"],
+    ["KONYASPOR", "GALATASARAY"],
+    ["BEŞİKTAŞ", "GÖZTEPE"],
+    ["ALANYASPOR", "BAŞAKŞEHİR"]
+  ],
+  // 24. HAFTA
+  [
+    ["SAMSUNSPOR", "GAZİANTEP FK"],
+    ["KASIMPAŞA", "Ç. RİZESPOR"],
+    ["TRABZONSPOR", "KARAGÜMRÜK"],
+    ["GÖZTEPE", "EYÜPSPOR"],
+    ["BAŞAKŞEHİR", "KONYASPOR"],
+    ["KOCAELİSPOR", "BEŞİKTAŞ"],
+    ["ANTALYASPOR", "FENERBAHÇE"],
+    ["GALATASARAY", "ALANYASPOR"],
+    ["GENÇLERBİRLİĞİ", "KAYSERİSPOR"]
+  ],
+  // 25. HAFTA
+  [
+    ["Ç. RİZESPOR", "ANTALYASPOR"],
+    ["KONYASPOR", "KASIMPAŞA"],
+    ["EYÜPSPOR", "KOCAELİSPOR"],
+    ["KAYSERİSPOR", "TRABZONSPOR"],
+    ["BEŞİKTAŞ", "GALATASARAY"],
+    ["FENERBAHÇE", "SAMSUNSPOR"],
+    ["ALANYASPOR", "GENÇLERBİRLİĞİ"],
+    ["GAZİANTEP FK", "KARAGÜMRÜK"],
+    ["BAŞAKŞEHİR", "GÖZTEPE"]
+  ],
+  // 26. HAFTA
+  [
+    ["TRABZONSPOR", "Ç. RİZESPOR"],
+    ["ANTALYASPOR", "GAZİANTEP FK"],
+    ["KASIMPAŞA", "EYÜPSPOR"],
+    ["KOCAELİSPOR", "KONYASPOR"],
+    ["KARAGÜMRÜK", "FENERBAHÇE"],
+    ["GENÇLERBİRLİĞİ", "BEŞİKTAŞ"],
+    ["GÖZTEPE", "ALANYASPOR"],
+    ["SAMSUNSPOR", "KAYSERİSPOR"],
+    ["GALATASARAY", "BAŞAKŞEHİR"]
+  ],
+  // 27. HAFTA
+  [
+    ["ALANYASPOR", "KOCAELİSPOR"],
+    ["BAŞAKŞEHİR", "ANTALYASPOR"],
+    ["BEŞİKTAŞ", "KASIMPAŞA"],
+    ["EYÜPSPOR", "TRABZONSPOR"],
+    ["Ç. RİZESPOR", "SAMSUNSPOR"],
+    ["KONYASPOR", "GENÇLERBİRLİĞİ"],
+    ["GÖZTEPE", "GALATASARAY"],
+    ["FENERBAHÇE", "GAZİANTEP FK"],
+    ["KAYSERİSPOR", "KARAGÜMRÜK"]
+  ],
+  // 28. HAFTA
+  [
+    ["KARAGÜMRÜK", "Ç. RİZESPOR"],
+    ["TRABZONSPOR", "GALATASARAY"],
+    ["ANTALYASPOR", "EYÜPSPOR"],
+    ["SAMSUNSPOR", "KONYASPOR"],
+    ["FENERBAHÇE", "BEŞİKTAŞ"],
+    ["GAZİANTEP FK", "ALANYASPOR"],
+    ["KASIMPAŞA", "KAYSERİSPOR"],
+    ["GENÇLERBİRLİĞİ", "GÖZTEPE"],
+    ["KOCAELİSPOR", "BAŞAKŞEHİR"]
+  ],
+  // 29. HAFTA
+  [
+    ["BEŞİKTAŞ", "ANTALYASPOR"],
+    ["GÖZTEPE", "KASIMPAŞA"],
+    ["GALATASARAY", "KOCAELİSPOR"],
+    ["KAYSERİSPOR", "FENERBAHÇE"],
+    ["ALANYASPOR", "TRABZONSPOR"],
+    ["EYÜPSPOR", "SAMSUNSPOR"],
+    ["BAŞAKŞEHİR", "GENÇLERBİRLİĞİ"],
+    ["KONYASPOR", "KARAGÜMRÜK"],
+    ["Ç. RİZESPOR", "GAZİANTEP FK"]
+  ],
+  // 30. HAFTA
+  [
+    ["KOCAELİSPOR", "GÖZTEPE"],
+    ["FENERBAHÇE", "Ç. RİZESPOR"],
+    ["KARAGÜMRÜK", "EYÜPSPOR"],
+    ["GENÇLERBİRLİĞİ", "GALATASARAY"],
+    ["ANTALYASPOR", "KONYASPOR"],
+    ["SAMSUNSPOR", "BEŞİKTAŞ"],
+    ["KASIMPAŞA", "ALANYASPOR"],
+    ["GAZİANTEP FK", "KAYSERİSPOR"],
+    ["TRABZONSPOR", "BAŞAKŞEHİR"]
+  ],
+  // 31. HAFTA
+  [
+    ["GÖZTEPE", "ANTALYASPOR"],
+    ["BAŞAKŞEHİR", "KASIMPAŞA"],
+    ["GENÇLERBİRLİĞİ", "KOCAELİSPOR"],
+    ["ALANYASPOR", "SAMSUNSPOR"],
+    ["KONYASPOR", "TRABZONSPOR"],
+    ["GALATASARAY", "FENERBAHÇE"],
+    ["KAYSERİSPOR", "Ç. RİZESPOR"],
+    ["BEŞİKTAŞ", "KARAGÜMRÜK"],
+    ["EYÜPSPOR", "GAZİANTEP FK"]
+  ],
+  // 32. HAFTA
+  [
+    ["TRABZONSPOR", "GÖZTEPE"],
+    ["Ç. RİZESPOR", "KONYASPOR"],
+    ["SAMSUNSPOR", "GALATASARAY"],
+    ["KARAGÜMRÜK", "GENÇLERBİRLİĞİ"],
+    ["KAYSERİSPOR", "EYÜPSPOR"],
+    ["GAZİANTEP FK", "BEŞİKTAŞ"],
+    ["ANTALYASPOR", "ALANYASPOR"],
+    ["KASIMPAŞA", "KOCAELİSPOR"],
+    ["FENERBAHÇE", "BAŞAKŞEHİR"]
+  ],
+  // 33. HAFTA
+  [
+    ["ALANYASPOR", "KAYSERİSPOR"],
+    ["GALATASARAY", "ANTALYASPOR"],
+    ["GENÇLERBİRLİĞİ", "KASIMPAŞA"],
+    ["BEŞİKTAŞ", "TRABZONSPOR"],
+    ["KONYASPOR", "FENERBAHÇE"],
+    ["BAŞAKŞEHİR", "SAMSUNSPOR"],
+    ["GÖZTEPE", "GAZİANTEP FK"],
+    ["KOCAELİSPOR", "KARAGÜMRÜK"],
+    ["EYÜPSPOR", "Ç. RİZESPOR"]
+  ],
+  // 34. HAFTA
+  [
+    ["FENERBAHÇE", "EYÜPSPOR"],
+    ["SAMSUNSPOR", "GÖZTEPE"],
+    ["KAYSERİSPOR", "KONYASPOR"],
+    ["KASIMPAŞA", "GALATASARAY"],
+    ["TRABZONSPOR", "GENÇLERBİRLİĞİ"],
+    ["Ç. RİZESPOR", "BEŞİKTAŞ"],
+    ["KARAGÜMRÜK", "ALANYASPOR"],
+    ["ANTALYASPOR", "KOCAELİSPOR"],
+    ["GAZİANTEP FK", "BAŞAKŞEHİR"]
+  ]
+];
+
+
+    // Haftaların başlıkları otomatik
+    function getHaftaBaslik(idx) {
+      return (idx+1) + ". HAFTA";
+    }
+
+    // Her hafta için tahminler (dizinin elemanları: [{evGol, depGol}, ...])
+    let haftalikTahminler = haftalar.map(() => []);
+    let aktifHafta = 0;
+
+    // Her haftadan sonra sıralama tutulsun
+    let siralamaArsivi = [];
+
+    // Maç Satırlarını Oluştur
+    function macSatirOlustur() {
+      const maclarDiv = document.getElementById('maclar');
+      maclarDiv.innerHTML = "";
+      haftalar[aktifHafta].forEach(([ev, dep], idx) => {
+        maclarDiv.innerHTML += `
+        <div class="mac-row" data-ev="${ev}" data-deplasman="${dep}">
+          <span class="takim-isim">${ev}</span>
+          <img class="takim-logo" src="${takimBilgi[ev]?.logo || ''}" alt="${ev}">
+          <input class="tahmin-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" value="${haftalikTahminler[aktifHafta][idx]?.evGol ?? ''}">
+          <span class="orta-cizgi">-</span>
+          <input class="tahmin-input" type="text" maxlength="1" inputmode="numeric" pattern="[0-9]*" value="${haftalikTahminler[aktifHafta][idx]?.depGol ?? ''}">
+          <img class="takim-logo-dep" src="${takimBilgi[dep]?.logo || ''}" alt="${dep}">
+          <span class="takim-isim-dep">${dep}</span>
+        </div>
+        `;
+      });
+      document.getElementById('haftaTitle').innerText = getHaftaBaslik(aktifHafta);
+      aktifHaftaBtnGuncelle();
+    }
+
+    function aktifHaftaBtnGuncelle() {
+      document.getElementById('oncekiBtn').classList.toggle('aktif', aktifHafta === 0);
+      document.getElementById('sonrakiBtn').classList.toggle('aktif', aktifHafta === haftalar.length - 1);
+    }
+
+    macSatirOlustur();
+
+    // Sadece rakam girilsin
+    document.addEventListener('input', function(e) {
+      if (e.target.classList.contains('tahmin-input')) {
+        e.target.value = e.target.value.replace(/[^0-9]/g, '').slice(0, 1);
+      }
+    });
+
+    // HAFTA DEĞİŞTİRME
+    document.getElementById('oncekiBtn').onclick = () => {
+      if (aktifHafta > 0) {
+        aktifHafta -= 1;
+        macSatirOlustur();
+      }
+    };
+    document.getElementById('sonrakiBtn').onclick = () => {
+      if (aktifHafta < haftalar.length - 1) {
+        aktifHafta += 1;
+        macSatirOlustur();
+      }
+    };
+
+    // Tahminleri kaydet ve KÜMÜLATİF puan tablosu oluştur
+    document.getElementById('kaydetBtn').addEventListener('click', function() {
+      // Şu haftanın tahminlerini kaydet
+      let macRows = document.querySelectorAll('#maclar .mac-row');
+      haftalikTahminler[aktifHafta] = [];
+      macRows.forEach(function(row, idx) {
+        let inputs = row.querySelectorAll('.tahmin-input');
+        let evGol = parseInt(inputs[0].value || '0', 10);
+        let depGol = parseInt(inputs[1].value || '0', 10);
+        haftalikTahminler[aktifHafta][idx] = { evGol, depGol };
+      });
+
+      // Kümülatif tabloyu hazırla
+      let takimlar = {};
+      // Her hafta ve her maç için...
+      for (let h = 0; h < haftalar.length; ++h) {
+        haftalar[h].forEach(([ev, dep], idx) => {
+          // Eğer bu maç için tahmin yoksa atla
+          let t = haftalikTahminler[h][idx];
+          if (!t || typeof t.evGol !== 'number' || typeof t.depGol !== 'number') return;
+
+          let evGol = t.evGol, depGol = t.depGol;
+
+          [ev, dep].forEach(function(takim) {
+            if (!takimlar[takim]) {
+              takimlar[takim] = {
+                takim: takim,
+                logo: takimBilgi[takim]?.logo || "",
+                o: 0, g: 0, b: 0, m: 0, a: 0, y: 0, av: 0, p: 0
+              };
+            }
+          });
+
+          takimlar[ev].o += 1;
+          takimlar[dep].o += 1;
+          takimlar[ev].a += evGol;
+          takimlar[ev].y += depGol;
+          takimlar[dep].a += depGol;
+          takimlar[dep].y += evGol;
+
+          if (evGol > depGol) {
+            takimlar[ev].g += 1;
+            takimlar[ev].p += 3;
+            takimlar[dep].m += 1;
+          } else if (evGol < depGol) {
+            takimlar[dep].g += 1;
+            takimlar[dep].p += 3;
+            takimlar[ev].m += 1;
+          } else {
+            takimlar[ev].b += 1;
+            takimlar[dep].b += 1;
+            takimlar[ev].p += 1;
+            takimlar[dep].p += 1;
+          }
+        });
+      }
+
+      Object.values(takimlar).forEach(t => {
+        t.av = t.a - t.y;
+      });
+
+      let sirali = Object.values(takimlar).sort((a, b) => {
+        if (b.p !== a.p) return b.p - a.p;
+        if (b.av !== a.av) return b.av - a.av;
+        if (b.a !== a.a) return b.a - a.a;
+        return a.takim.localeCompare(b.takim, 'tr');
+      });
+
+      // Sıra değişimini hesapla
+      let degisimMap = {};
+      let oncekiSiralama = siralamaArsivi[siralamaArsivi.length - 1] || [];
+      if (oncekiSiralama.length > 0) {
+        sirali.forEach((t, i) => {
+          let oncekiIndex = oncekiSiralama.indexOf(t.takim);
+          if (oncekiIndex !== -1) {
+            let fark = oncekiIndex - i;
+            if (fark > 0) {
+              degisimMap[t.takim] = { type: "up", val: fark };
+            } else if (fark < 0) {
+              degisimMap[t.takim] = { type: "down", val: -fark };
+            } else {
+              degisimMap[t.takim] = { type: "same", val: 0 };
+            }
+          }
+        });
+      }
+
+      // Yeni sıralamayı kaydet
+      siralamaArsivi.push(sirali.map(t => t.takim));
+      // Arşivi sadece en sonuncu ile sınırla (istenirse tüm haftalar tutulur)
+      if (siralamaArsivi.length > haftalar.length) siralamaArsivi.shift();
+
+      let toplamHafta = haftalikTahminler.filter(h => h.length > 0).length;
+      let html = `<table class="puan-tablosu">
+        <caption>${toplamHafta}. HAFTA SONU KÜMÜLATİF PUAN DURUMU</caption>
+        <tr>
+          <th>#</th>
+          <th>Takım</th>
+          <th>O</th>
+          <th>G</th>
+          <th>B</th>
+          <th>M</th>
+          <th>A</th>
+          <th>Y</th>
+          <th>AV</th>
+          <th>P</th>
+        </tr>`;
+      sirali.forEach((t, i) => {
+        html += `<tr>
+          <td>${i + 1}</td>
+          <td class="takim-adi">
+            ${t.logo ? `<img class="takim-logo" src="${t.logo}" alt="${t.takim}">` : ""}
+            ${
+              toplamHafta > 1 && degisimMap[t.takim] && degisimMap[t.takim].type !== "same"
+              ? `<span class="sira-degisim ${degisimMap[t.takim].type === "up" ? "sira-up" : "sira-down"}">
+                  ${degisimMap[t.takim].type === "up" ? "▲" : "▼"}${degisimMap[t.takim].val}
+                </span>`
+              : `<span class="sira-degisim" style="min-width:32px"></span>`
+            }
+            ${t.takim}
+          </td>
+          <td>${t.o}</td>
+          <td>${t.g}</td>
+          <td>${t.b}</td>
+          <td>${t.m}</td>
+          <td>${t.a}</td>
+          <td>${t.y}</td>
+          <td>${t.av >= 0 ? '+' : ''}${t.av}</td>
+          <td><b>${t.p}</b></td>
+        </tr>`;
+      });
+      html += `</table>`;
+
+      document.getElementById('puanTablosu').innerHTML = html;
+      window.scrollTo({top: document.body.scrollHeight, behavior: "smooth"});
+    });
+  </script>
+</body>
+</html>
